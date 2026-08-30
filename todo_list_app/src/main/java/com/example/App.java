@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.TimerTask;
+import java.util.Timer;
+import java.util.UUID;
 
 import java.time.LocalDateTime;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
@@ -20,7 +25,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        connectToDatabase();
+        Timer timer = new Timer();
 
         todoList newList = new todoList();
         newList.addItem("Finish project", LocalDateTime.of(2026, 4, 5, 17, 0), true, false, scale.LARGE);
@@ -33,14 +38,60 @@ public class App
             System.out.println("Task: " + item.task + ", \nDeadline: " + item.deadline + ", \nManual: " + item.mmanual + ", \nRecurring: " + item.recurring + ", \nUrgency: " + item.urgency + ", \nSize: " + item.size + ", \nScheduled Time: " + item.scheduledTime + "\n\n");
         }
 
+        saveToDatabase(newList);
+
+        // Creates a timer to autosave
+        timer.schedule( new TimerTask() {
+            public void run() {
+                saveToDatabase(newList); 
+            }
+        }, 0, 60*5000);
+
+        // Terminates the timer on shutdown and saves to database
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                timer.cancel();
+                saveToDatabase(newList);
+                System.out.println("In shutdown hook");
+            }
+        }, "Shutdown-thread"));
+
     }
 
-    public static void connectToDatabase() {
-        String url = "jdbc:sqlite:todo_list.db";
+    /**
+     * Connects to Database and saves the list
+     */
+    public static void saveToDatabase(todoList todo) {
+        String url = "jdbc:sqlite:sql\\todo_list.db";
+        String insertQuery = "MERGE GAZ_LIST AS GL ON (GL.TASK_ID = ?) WHEN MATCHED THEN UDATE SET RANK = ?, TASK = ?, DEADLINE = ?, SCHEDULED_TIME = ?, MANUAL = ?, RECURRING = ?, SIZE = ?, STATUS = ? WHEN NOT MATCHED (TASK_ID, RANK, TASK, DEADLINE, SCHEDULED_TIME, MANUAL, RECURRING, SIZE, STATUS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
+                PreparedStatement ps = conn.prepareStatement(insertQuery);
                 System.out.println("Connected to the database!");
+                for(todoItem item:todo.inputList) {
+                    ps.setString(1, item.getTaskID());
+                    ps.setInt(2, item.getRank());
+                    ps.setString(3, item.getTask());
+                    ps.setString(4, item.getDeadline());
+                    ps.setString(5, item.getScheduledTime());
+                    ps.setString(6, item.getManual());
+                    ps.setString(7, item.getRecurring());
+                    ps.setInt(8, item.getSize());
+                    ps.setInt(9, item.getStatus());
+
+                    ps.setString(10, item.getTaskID());
+                    ps.setInt(11, item.getRank());
+                    ps.setString(12, item.getTask());
+                    ps.setString(13, item.getDeadline());
+                    ps.setString(14, item.getScheduledTime());
+                    ps.setString(15, item.getManual());
+                    ps.setString(16, item.getRecurring());
+                    ps.setInt(17, item.getSize());
+                    ps.setInt(18, item.getStatus());
+
+                    ps.execute();
+                }
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -169,9 +220,22 @@ class todoList {
         this.inputList.addAll(mediumItems);
         this.inputList.addAll(smallItems);
 
+        for(int i = 0; i < inputList.size(); i++) {
+            inputList.get(i).setRank(i + 1);
+        }
+
         largeItems = null;
         mediumItems = null;
         smallItems = null;
+    }
+
+    /**
+     * Returns a size integer for the list
+     * @return int
+     */
+    public int getSize() {
+        int size = inputList.size();
+        return size;
     }
 }
 
@@ -179,6 +243,8 @@ class todoList {
  * This is the class definition for a to-do item
  */
  class todoItem {
+    String taskID = "";
+    int rank = 0;
     String task = "";
     LocalDateTime deadline = null;
     LocalDateTime scheduledTime = null;
@@ -187,7 +253,7 @@ class todoList {
     Boolean urgency = null;
     Boolean isComplete = false;
     scale size = null;
-
+    progress status = null;
     /**
      * This construucts a new to-do item with the given parameters
      * @param task
@@ -197,6 +263,7 @@ class todoList {
      * @param size
      */
     public todoItem(String task, LocalDateTime deadline, Boolean mmanual, Boolean recurring, scale size) {
+        this.taskID = "" + UUID.randomUUID();
         this.task = task;
         this.deadline = deadline;
         this.scheduledTime = null;
@@ -204,6 +271,22 @@ class todoList {
         this.recurring = recurring;
         this.urgency = (deadline.isBefore(LocalDateTime.now().plusDays(7))) ? true : false;
         this.size = size;
+        this.status = progress.NOT_STARTED;
+    }
+
+    /**
+     * Set's the rank of the task
+     * @param currentRank
+     */
+    public void setRank(int currentRank) {
+        this.rank = currentRank;
+    }
+
+    /**
+     * Update to in progress
+     */
+    public void markInProgress() {
+        this.status = progress.IN_PROGRESS;
     }
 
     /**
@@ -211,8 +294,95 @@ class todoList {
      */
     public void markComplete() {
         this.isComplete = true;
+        this.status = progress.COMPLETED;
+    }
+
+    /**
+     * Cancel a task
+     */
+    public void markCanceled() {
+        this.isComplete = true;
+        this.status = progress.CANCELED;
+    }
+
+    /**
+     * Returns the Task ID
+     * @return String
+     */
+    public String getTaskID() {
+        return taskID;
+    }
+
+    /**
+     * Returns the rank of the task
+     * @return int
+     */
+    public int getRank() {
+        return rank;
+    }
+
+    /**
+     * Returns the task definition
+     * @return String
+     */
+    public String getTask() {
+        return task;
+    }
+
+    /**
+     * Returns the deadline
+     * @return String
+     */
+    public String getDeadline() {
+        String dl = deadline.toString();
+        return dl;
+    }
+
+    /**
+     * Returns the scheduled time
+     * @return String
+     */
+    public String getScheduledTime() {
+        String st = scheduledTime.toString();
+        return st;
+    }
+
+    /**
+     * Returns the manual status
+     * @return String
+     */
+    public String getManual() {
+        String m = "" + mmanual;
+        return m;
+    }
+
+    /**
+     * Returns the recurring status
+     * @return String
+     */
+    public String getRecurring() {
+        String r = "" + recurring;
+        return r;
+    }
+
+    /**
+     * Returns the size of the task
+     * @return int
+     */
+    public int getSize() {
+        return size.ordinal();
+    }
+
+    /**
+     * Returns the status of the task
+     * @return int
+     */
+    public int getStatus() {
+        return status.ordinal();
     }
 }
+
+
 
 /**
  * This comparator is used to sort items in a to-do list by their deadline, with the earliest deadlines first.
@@ -235,4 +405,19 @@ enum scale {
     SMALL,
     MEDIUM,
     LARGE;
+}
+
+/**
+ * This is for the progress of the project:
+ * 
+ * NOT_STARTED == The task has not been started yet
+ * IN_PROGRESS == The task is currently being worked on
+ * COMPLETED == The task has been completed
+ * CANCELED == The task has been canceled and will not be completed
+ */
+enum progress {
+    NOT_STARTED,
+    IN_PROGRESS,
+    COMPLETED,
+    CANCELED;
 }
