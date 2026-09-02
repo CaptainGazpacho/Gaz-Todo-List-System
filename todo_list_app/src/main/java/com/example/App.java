@@ -63,34 +63,53 @@ public class App
      */
     public static void saveToDatabase(todoList todo) {
         String url = "jdbc:sqlite:sql\\todo_list.db";
-        String insertQuery = "MERGE GAZ_LIST AS GL ON (GL.TASK_ID = ?) WHEN MATCHED THEN UDATE SET RANK = ?, TASK = ?, DEADLINE = ?, SCHEDULED_TIME = ?, MANUAL = ?, RECURRING = ?, SIZE = ?, STATUS = ? WHEN NOT MATCHED (TASK_ID, RANK, TASK, DEADLINE, SCHEDULED_TIME, MANUAL, RECURRING, SIZE, STATUS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        String checkQuery = "SELECT COUNT(*) FROM GAZ_LIST WHERE TASK_ID = ?;";
+        
+        String updateQuery = "UPDATE GAZ_LIST SET RANK = ?, TASK = ?, DEADLINE = ?, SCHEDULED_TIME = ?, MANUAL = ?, RECURRING = ?, SIZE = ?, STATUS = ? WHERE TASK_ID = ?;";
+
+        String insertQuery = "INSERT INTO GAZ_LIST (TASK_ID, RANK, TASK, DEADLINE, SCHEDULED_TIME, MANUAL, RECURRING, SIZE, STATUS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
-                PreparedStatement ps = conn.prepareStatement(insertQuery);
+                PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
+                PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
                 System.out.println("Connected to the database!");
+
+                int count = 0;
+
                 for(todoItem item:todo.inputList) {
-                    ps.setString(1, item.getTaskID());
-                    ps.setInt(2, item.getRank());
-                    ps.setString(3, item.getTask());
-                    ps.setString(4, item.getDeadline());
-                    ps.setString(5, item.getScheduledTime());
-                    ps.setString(6, item.getManual());
-                    ps.setString(7, item.getRecurring());
-                    ps.setInt(8, item.getSize());
-                    ps.setInt(9, item.getStatus());
 
-                    ps.setString(10, item.getTaskID());
-                    ps.setInt(11, item.getRank());
-                    ps.setString(12, item.getTask());
-                    ps.setString(13, item.getDeadline());
-                    ps.setString(14, item.getScheduledTime());
-                    ps.setString(15, item.getManual());
-                    ps.setString(16, item.getRecurring());
-                    ps.setInt(17, item.getSize());
-                    ps.setInt(18, item.getStatus());
+                    checkStmt.setString(1, item.getTaskID());
+                    
+                    count = checkStmt.executeQuery().getInt(1);
 
-                    ps.execute();
+                    if (count > 0) {
+                        updateStmt.setInt(1, item.getRank());
+                        updateStmt.setString(2, item.getTask());
+                        updateStmt.setString(3, item.getDeadline());
+                        updateStmt.setString(4, item.getScheduledTime());
+                        updateStmt.setString(5, item.getManual());
+                        updateStmt.setString(6, item.getRecurring());
+                        updateStmt.setInt(7, item.getSize());
+                        updateStmt.setInt(8, item.getStatus());
+                        updateStmt.setString(9, item.getTaskID());
+
+                        updateStmt.executeUpdate();
+                    } else {
+                        insertStmt.setString(1, item.getTaskID());
+                        insertStmt.setInt(2, item.getRank());
+                        insertStmt.setString(3, item.getTask());
+                        insertStmt.setString(4, item.getDeadline());
+                        insertStmt.setString(5, item.getScheduledTime());
+                        insertStmt.setString(6, item.getManual());
+                        insertStmt.setString(7, item.getRecurring());
+                        insertStmt.setInt(8, item.getSize());
+                        insertStmt.setInt(9, item.getStatus());
+
+                        insertStmt.executeUpdate();
+                    }
                 }
             }
         } catch (SQLException e) {
