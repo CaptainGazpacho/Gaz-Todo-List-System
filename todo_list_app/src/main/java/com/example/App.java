@@ -40,7 +40,7 @@ public class App
 
         saveToDatabase(newList);
 
-        // Creates a timer to autosave
+        /*// Creates a timer to autosave
         timer.schedule( new TimerTask() {
             public void run() {
                 saveToDatabase(newList); 
@@ -54,7 +54,7 @@ public class App
                 saveToDatabase(newList);
                 System.out.println("In shutdown hook");
             }
-        }, "Shutdown-thread"));
+        }, "Shutdown-thread")); */
 
     }
 
@@ -64,6 +64,8 @@ public class App
     public static void saveToDatabase(todoList todo) {
         String url = "jdbc:sqlite:sql\\todo_list.db";
 
+
+        //TODO: Replace ID check with hash check for dedup
         String checkQuery = "SELECT COUNT(*) FROM GAZ_LIST WHERE TASK_ID = ?;";
         
         String updateQuery = "UPDATE GAZ_LIST SET RANK = ?, TASK = ?, DEADLINE = ?, SCHEDULED_TIME = ?, MANUAL = ?, RECURRING = ?, SIZE = ?, STATUS = ? WHERE TASK_ID = ?;";
@@ -81,9 +83,10 @@ public class App
 
                 for(todoItem item:todo.inputList) {
 
+                    //Checks the database to see if the item already exists, if it does it updates it, if not it inserts it
                     checkStmt.setString(1, item.getTaskID());
-                    
                     count = checkStmt.executeQuery().getInt(1);
+                    System.out.println("Count: " + count);
 
                     if (count > 0) {
                         updateStmt.setInt(1, item.getRank());
