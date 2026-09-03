@@ -1,4 +1,4 @@
-package com.example;
+package com.gaz.todolist;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,4 +1,4 @@
-package com.example;
+package com.gaz.todolist;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
