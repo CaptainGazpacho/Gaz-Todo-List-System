@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TimerTask;
 import java.util.Timer;
-import java.util.UUID;
 
 import java.time.LocalDateTime;
 
@@ -64,8 +63,6 @@ public class App
     public static void saveToDatabase(todoList todo) {
         String url = "jdbc:sqlite:sql\\todo_list.db";
 
-
-        //TODO: Replace ID check with hash check for dedup
         String checkQuery = "SELECT COUNT(*) FROM GAZ_LIST WHERE TASK_ID = ?;";
         
         String updateQuery = "UPDATE GAZ_LIST SET RANK = ?, TASK = ?, DEADLINE = ?, SCHEDULED_TIME = ?, MANUAL = ?, RECURRING = ?, SIZE = ?, STATUS = ? WHERE TASK_ID = ?;";
@@ -77,7 +74,6 @@ public class App
                 PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
                 PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
                 PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
-                System.out.println("Connected to the database!");
 
                 int count = 0;
 
@@ -86,7 +82,6 @@ public class App
                     //Checks the database to see if the item already exists, if it does it updates it, if not it inserts it
                     checkStmt.setString(1, item.getTaskID());
                     count = checkStmt.executeQuery().getInt(1);
-                    System.out.println("Count: " + count);
 
                     if (count > 0) {
                         updateStmt.setInt(1, item.getRank());
@@ -276,8 +271,9 @@ class todoList {
     Boolean isComplete = false;
     scale size = null;
     progress status = null;
+    String toString = "";
     /**
-     * This construucts a new to-do item with the given parameters
+     * This constructs a new to-do item with the given parameters
      * @param task
      * @param deadline
      * @param mmanual
@@ -285,7 +281,8 @@ class todoList {
      * @param size
      */
     public todoItem(String task, LocalDateTime deadline, Boolean mmanual, Boolean recurring, scale size) {
-        this.taskID = "" + UUID.randomUUID();
+        this.toString = "Task: " + task + ", Deadline: " + deadline + ", Manual: " + mmanual + ", Recurring: " + recurring + ", Size: " + size;
+        this.taskID = "" + this.toString.hashCode();
         this.task = task;
         this.deadline = deadline;
         this.scheduledTime = null;
@@ -401,6 +398,14 @@ class todoList {
      */
     public int getStatus() {
         return status.ordinal();
+    }
+
+    /**
+     * Returns a string representation of the todo item
+     * @return String
+     */
+    public String toString() {
+        return this.toString;
     }
 }
 
