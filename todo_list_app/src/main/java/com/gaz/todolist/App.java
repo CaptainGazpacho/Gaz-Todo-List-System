@@ -63,51 +63,28 @@ public class App
     public static void saveToDatabase(todoList todo) {
         String url = "jdbc:sqlite:sql\\todo_list.db";
 
-        String checkQuery = "SELECT COUNT(*) FROM GAZ_LIST WHERE TASK_ID = ?;";
-        
-        String updateQuery = "UPDATE GAZ_LIST SET RANK = ?, TASK = ?, DEADLINE = ?, SCHEDULED_TIME = ?, MANUAL = ?, RECURRING = ?, SIZE = ?, STATUS = ? WHERE TASK_ID = ?;";
-
-        String insertQuery = "INSERT INTO GAZ_LIST (TASK_ID, RANK, TASK, DEADLINE, SCHEDULED_TIME, MANUAL, RECURRING, SIZE, STATUS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String mergeQuery = """
+                INSERT OR REPLACE INTO GAZ_LIST
+                    (TASK_ID, RANK, TASK, DEADLINE, SCHEDULED_TIME, MANUAL, RECURRING, SIZE, STATUS)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
-                PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
-                PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
-                PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
-
-                int count = 0;
+                PreparedStatement mergeStmt = conn.prepareStatement(mergeQuery);
 
                 for(todoItem item:todo.inputList) {
+                    mergeStmt.setString(1, item.getTaskID());
+                    mergeStmt.setInt(2, item.getRank());
+                    mergeStmt.setString(3, item.getTask());
+                    mergeStmt.setString(4, item.getDeadline());
+                    mergeStmt.setString(5, item.getScheduledTime());
+                    mergeStmt.setString(6, item.getManual());
+                    mergeStmt.setString(7, item.getRecurring());
+                    mergeStmt.setInt(8, item.getSize());
+                    mergeStmt.setInt(9, item.getStatus());
 
-                    //Checks the database to see if the item already exists, if it does it updates it, if not it inserts it
-                    checkStmt.setString(1, item.getTaskID());
-                    count = checkStmt.executeQuery().getInt(1);
-
-                    if (count > 0) {
-                        updateStmt.setInt(1, item.getRank());
-                        updateStmt.setString(2, item.getTask());
-                        updateStmt.setString(3, item.getDeadline());
-                        updateStmt.setString(4, item.getScheduledTime());
-                        updateStmt.setString(5, item.getManual());
-                        updateStmt.setString(6, item.getRecurring());
-                        updateStmt.setInt(7, item.getSize());
-                        updateStmt.setInt(8, item.getStatus());
-                        updateStmt.setString(9, item.getTaskID());
-
-                        updateStmt.executeUpdate();
-                    } else {
-                        insertStmt.setString(1, item.getTaskID());
-                        insertStmt.setInt(2, item.getRank());
-                        insertStmt.setString(3, item.getTask());
-                        insertStmt.setString(4, item.getDeadline());
-                        insertStmt.setString(5, item.getScheduledTime());
-                        insertStmt.setString(6, item.getManual());
-                        insertStmt.setString(7, item.getRecurring());
-                        insertStmt.setInt(8, item.getSize());
-                        insertStmt.setInt(9, item.getStatus());
-
-                        insertStmt.executeUpdate();
-                    }
+                    mergeStmt.execute();
                 }
             }
         } catch (SQLException e) {
