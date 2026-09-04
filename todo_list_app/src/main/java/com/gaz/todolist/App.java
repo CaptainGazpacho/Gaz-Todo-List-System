@@ -19,6 +19,9 @@ public class App
 {
     public static void main( String[] args )
     {
+
+       databaseManager.createDatabase();
+
         Dotenv dotenv = Dotenv.load();
         String account = dotenv.get("ACCOUNT");
 
