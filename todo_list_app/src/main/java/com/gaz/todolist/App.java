@@ -19,9 +19,6 @@ public class App
 {
     public static void main( String[] args )
     {
-
-       databaseManager.createDatabase();
-
         Dotenv dotenv = Dotenv.load();
         String account = dotenv.get("ACCOUNT");
 
@@ -41,15 +38,27 @@ public class App
 
         timer.schedule( new TimerTask() {
             public void run() {
-                databaseManager.saveToDatabase(newList); 
+                databaseManager.saveToDatabase("TODO_LIST", newList.inputList);
+                databaseManager.saveToDatabase("MANUAL_TODO_LIST", newList.manualDoList);
+                databaseManager.saveToDatabase("PLAN_TODO_LIST", newList.planDoList);
+                databaseManager.saveToDatabase("DELEGATE_TODO_LIST", newList.delegateDoList);
+                databaseManager.saveToDatabase("HOLD_TODO_LIST", newList.holdDoList);
+                databaseManager.saveToDatabase("RECURRING_TODO_LIST", newList.recurringDoList);
+                databaseManager.saveToDatabase("COMPLETE_TODO_LIST", newList.completeDoList);
             }
-        }, 0, 60*5000);
+        }, 0, 60*1000*30); // 30 minutes
 
         // Terminates the timer on shutdown and saves to database
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 timer.cancel();
-                databaseManager.saveToDatabase(newList);
+                databaseManager.saveToDatabase("TODO_LIST", newList.inputList);
+                databaseManager.saveToDatabase("MANUAL_TODO_LIST", newList.manualDoList);
+                databaseManager.saveToDatabase("PLAN_TODO_LIST", newList.planDoList);
+                databaseManager.saveToDatabase("DELEGATE_TODO_LIST", newList.delegateDoList);
+                databaseManager.saveToDatabase("HOLD_TODO_LIST", newList.holdDoList);
+                databaseManager.saveToDatabase("RECURRING_TODO_LIST", newList.recurringDoList);
+                databaseManager.saveToDatabase("COMPLETE_TODO_LIST", newList.completeDoList);
             }
         }, "Shutdown-thread"));
 
