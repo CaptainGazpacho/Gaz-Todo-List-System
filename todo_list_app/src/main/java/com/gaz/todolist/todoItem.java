@@ -1,13 +1,13 @@
 package com.gaz.todolist;
 
 import java.util.Comparator;
-
 import java.time.LocalDateTime;
 
 /**
  * This is the class definition for a to-do item
  */
  class todoItem {
+    String Account = "";
     String taskID = "";
     int rank = 0;
     String task = "";
@@ -20,17 +20,19 @@ import java.time.LocalDateTime;
     scale size = null;
     progress status = null;
     String toString = "";
-    
+
     /**
      * This constructs a new to-do item with the given parameters
+     * @param account
      * @param task
      * @param deadline
      * @param mmanual
      * @param recurring
      * @param size
      */
-    public todoItem(String task, LocalDateTime deadline, Boolean mmanual, Boolean recurring, scale size) {
-        this.toString = "Task: " + task + ", Deadline: " + deadline + ", Manual: " + mmanual + ", Recurring: " + recurring + ", Size: " + size;
+    public todoItem(String account, String task, LocalDateTime deadline, Boolean mmanual, Boolean recurring, scale size) {
+        this.Account = account;
+        this.toString = "Account: " + account + ", Task: " + task + ", Deadline: " + deadline + ", Manual: " + mmanual + ", Recurring: " + recurring + ", Size: " + size;
         this.taskID = "" + this.toString.hashCode();
         this.task = task;
         this.deadline = deadline;
@@ -43,6 +45,38 @@ import java.time.LocalDateTime;
     }
 
     /**
+     * Set's the account of the task
+     * @param account
+     */
+    public void setAccount(String account) {
+        this.Account = account;
+    }
+
+    /**
+     * Returns the account of the task
+     * @return String
+     */
+    public String getAccount() {
+        return this.Account;
+    }
+
+    /**
+     * Sets the task ID
+     * @param taskID
+     */
+    public void setTaskID(String taskID) {
+        this.taskID = taskID;
+    }
+
+    /**
+     * Returns the Task ID
+     * @return String
+     */
+    public String getTaskID() {
+        return taskID;
+    }
+
+    /**
      * Set's the rank of the task
      * @param currentRank
      */
@@ -51,6 +85,130 @@ import java.time.LocalDateTime;
     }
 
     /**
+     * Returns the rank of the task
+     * @return int
+     */
+    public int getRank() {
+        return rank;
+    }
+
+    /**
+     * Sets the task definition
+     * @param task
+     */
+    public void setTask(String task) {
+        this.task = task;
+    }
+
+    /**
+     * Returns the task definition
+     * @return String
+     */
+    public String getTask() {
+        return task;
+    }
+
+    /**
+     * Sets the deadline
+     * @param deadline
+     */
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
+    }
+
+    /**
+     * Returns the deadline
+     * @return String
+     */
+    public String getDeadline() {
+        String dl = deadline.toString();
+        return dl;
+    }
+
+    /**
+     * Sets the scheduled time
+     * @param scheduledTime
+     */
+    public void setScheduledTime(LocalDateTime scheduledTime) {
+        this.scheduledTime = scheduledTime;
+    }
+
+    /**
+     * Returns the scheduled time
+     * @return String
+     */
+    public String getScheduledTime() {
+        String st = scheduledTime.toString();
+        return st;
+    }
+
+    /**
+     * Sets the manual status
+     * @param mmanual
+     */
+    public void setManual(Boolean mmanual) {
+        this.mmanual = mmanual;
+    }
+
+    /**
+     * Returns the manual status
+     * @return String
+     */
+    public String getManual() {
+        String m = "" + mmanual;
+        return m;
+    }
+
+    /**
+     * Sets the recurring status
+     * @param recurring
+     */
+    public void setRecurring(Boolean recurring) {
+        this.recurring = recurring;
+    }
+
+    /**
+     * Returns the recurring status
+     * @return String
+     */
+    public String getRecurring() {
+        String r = "" + recurring;
+        return r;
+    }
+
+    /**
+     * Sets the size of the task
+     * @param size
+     */
+    public void setSize(scale size) {
+        this.size = size;
+    }
+
+    /**
+     * Returns the size of the task
+     * @return int
+     */
+    public int getSize() {
+        return size.ordinal();
+    }
+
+    /**
+     * Sets the status of the task
+     * @param status
+     */
+    public void setStatus(progress status) {
+        this.status = status;
+    }
+
+    /**
+     * Returns the status of the task
+     * @return int
+     */
+    public int getStatus() {
+        return status.ordinal();
+    }
+
+        /**
      * Update to in progress
      */
     public void markInProgress() {
@@ -71,82 +229,6 @@ import java.time.LocalDateTime;
     public void markCanceled() {
         this.isComplete = true;
         this.status = progress.CANCELED;
-    }
-
-    /**
-     * Returns the Task ID
-     * @return String
-     */
-    public String getTaskID() {
-        return taskID;
-    }
-
-    /**
-     * Returns the rank of the task
-     * @return int
-     */
-    public int getRank() {
-        return rank;
-    }
-
-    /**
-     * Returns the task definition
-     * @return String
-     */
-    public String getTask() {
-        return task;
-    }
-
-    /**
-     * Returns the deadline
-     * @return String
-     */
-    public String getDeadline() {
-        String dl = deadline.toString();
-        return dl;
-    }
-
-    /**
-     * Returns the scheduled time
-     * @return String
-     */
-    public String getScheduledTime() {
-        String st = scheduledTime.toString();
-        return st;
-    }
-
-    /**
-     * Returns the manual status
-     * @return String
-     */
-    public String getManual() {
-        String m = "" + mmanual;
-        return m;
-    }
-
-    /**
-     * Returns the recurring status
-     * @return String
-     */
-    public String getRecurring() {
-        String r = "" + recurring;
-        return r;
-    }
-
-    /**
-     * Returns the size of the task
-     * @return int
-     */
-    public int getSize() {
-        return size.ordinal();
-    }
-
-    /**
-     * Returns the status of the task
-     * @return int
-     */
-    public int getStatus() {
-        return status.ordinal();
     }
 
     /**

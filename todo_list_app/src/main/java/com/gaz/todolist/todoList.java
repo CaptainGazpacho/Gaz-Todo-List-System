@@ -23,14 +23,15 @@ class todoList {
 
     /**
      * This function adds a new item to the input list and refreshes the sort
+     * @param account
      * @param task
      * @param deadline
      * @param mmanual
      * @param recurring
      * @param size
      */
-    public void addItem(String task, LocalDateTime deadline, Boolean mmanual, Boolean recurring, scale size) {
-        inputList.add(new todoItem(task, deadline, mmanual, recurring, size));
+    public void addItem(String account, String task, LocalDateTime deadline, Boolean mmanual, Boolean recurring, scale size) {
+        inputList.add(new todoItem(account, task, deadline, mmanual, recurring, size));
         this.refreshLists();
     }
 
@@ -63,6 +64,62 @@ class todoList {
         completeDoList = inputList.stream()
             .filter(item -> item.isComplete)
             .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Returns the input list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getInputList() {
+        return this.inputList;
+    }
+
+    /**
+     * Returns the manual do list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getManualDoList() {
+        return this.manualDoList;
+    }
+
+    /**
+     * Returns the plan do list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getPlanDoList() {
+        return this.planDoList;
+    }
+
+    /**
+     * Returns the delegate do list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getDelegateDoList() {
+        return this.delegateDoList;
+    }
+
+    /**
+     * Returns the hold do list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getHoldDoList() {
+        return this.holdDoList;
+    }
+
+    /**
+     * Returns the recurring do list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getRecurringDoList() {
+        return this.recurringDoList;
+    }
+
+    /**
+     * Returns the complete do list
+     * @return ArrayList<todoItem>
+     */
+    public ArrayList<todoItem> getCompleteDoList() {
+        return this.completeDoList;
     }
 
     /**
