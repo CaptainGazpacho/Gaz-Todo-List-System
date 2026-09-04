@@ -12,6 +12,7 @@ public class databaseManager {
 
     /**
      * Creates a new database file if it does not already exist
+     * Note to setup the queries for other tables and have them run here as well
      */
     public static void createDatabase() {
         try {
@@ -25,6 +26,111 @@ public class databaseManager {
             System.out.println("An error occurred.");
             e.printStackTrace(); 
         }
+
+        String createTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
+
+        String createManualTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS MANUAL_TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
+
+        String createPlanTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS PLAN_TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
+
+        String createDelegateTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS DELEGATE_TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
+
+        String createHoldTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS HOLD_TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
+
+        String createRecurringTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS RECURRING_TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
+
+        String createCompleteTodoListTableQuery = """
+                CREATE TABLE IF NOT EXISTS COMPLETE_TODO_LIST (
+	                "ACCOUNT"	TEXT,
+	                "TASK_ID"	TEXT,
+	                "RANK"	INTEGER,
+	                "TASK"	TEXT,
+	                "DEADLINE"	INTEGER,
+	                "SCHEDULED_TIME"	TEXT,
+	                "MANUAL"	TEXT,
+	                "RECURRING"	TEXT,
+	                "SIZE"	INTEGER,
+	                "STATUS"	INTEGER
+                );
+                """;
     }
 
     /**
