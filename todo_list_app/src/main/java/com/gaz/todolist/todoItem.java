@@ -43,6 +43,23 @@ import java.time.LocalDateTime;
         this.size = size;
         this.status = progress.NOT_STARTED;
     }
+ 
+    /**
+     * This constructs a new to-do item with default values SOLELY for the purpose of loading existing items from the database. Do not use this constructor to create new items.
+     */
+    public todoItem() {
+        this.Account = "";
+        this.toString = "";
+        this.taskID = "";
+        this.task = "";
+        this.deadline = null;
+        this.scheduledTime = null;
+        this.mmanual = null;
+        this.recurring = null;
+        this.urgency = null;
+        this.size = null;
+        this.status = null;
+    }
 
     /**
      * Set's the account of the task
@@ -182,6 +199,22 @@ import java.time.LocalDateTime;
      */
     public void setSize(scale size) {
         this.size = size;
+    }
+
+    /**
+     * Sets the urgency of the task
+     * @param urgency
+     */
+    public void setUrgency(Boolean urgency) {
+        this.urgency = urgency;
+    }
+
+    /**
+     * Returns the urgency of the task
+     * @return Boolean
+     */
+    public Boolean getUrgency() {
+        return this.urgency;
     }
 
     /**

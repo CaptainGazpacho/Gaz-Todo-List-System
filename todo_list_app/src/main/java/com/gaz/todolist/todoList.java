@@ -36,6 +36,37 @@ class todoList {
     }
 
     /**
+     * This function loads an existing item from the database into the input list and refreshes the sort
+     * @param account
+     * @param taskID
+     * @param rank
+     * @param task
+     * @param deadline
+     * @param scheduledTime
+     * @param mmanual
+     * @param recurring
+     * @param size
+     * @param status
+     */
+    public void loadExistingItem(String account, String taskID, int rank, String task, LocalDateTime deadline, LocalDateTime scheduledTime, Boolean mmanual, Boolean recurring, scale size, progress status) {
+        todoItem item = new todoItem();
+        item.setAccount(account);
+        item.setTaskID(taskID);
+        item.setRank(rank);
+        item.setTask(task);
+        item.setDeadline(deadline);
+        item.setScheduledTime(scheduledTime);
+        item.setManual(mmanual);
+        item.setRecurring(recurring);
+        item.setUrgency((deadline.isBefore(LocalDateTime.now().plusDays(7))) ? true : false);
+        item.setSize(size);
+        item.setStatus(status);
+
+        inputList.add(item);
+        this.refreshLists();
+    }
+
+    /**
      * This function refreshes the list after any updates were made, such as the addition of a new item or the completion of an existing one
      */
     public void refreshLists() {

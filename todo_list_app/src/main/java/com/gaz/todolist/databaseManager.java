@@ -6,8 +6,13 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class databaseManager {
 
@@ -163,6 +168,51 @@ public class databaseManager {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    /**
+     * Loads data from the database.
+     * @return A todoList object containing the loaded data.
+     */
+    public static todoList loadData() {
+        createDatabase();
+
+        Dotenv dotenv = Dotenv.load();
+
+        todoList todoList = new todoList();
+
+        String url = "jdbc:sqlite:todo_list_app\\sql\\todo_list.db";
+
+        String loadQuery = """
+                SELECT * FROM TODO_LIST WHERE ACCOUNT = ?;
+                """;
+
+        try (Connection conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                PreparedStatement loadStmt = conn.prepareStatement(loadQuery);
+                loadStmt.setString(1, dotenv.get("ACCOUNT"));
+                ResultSet resultSet = loadStmt.executeQuery();
+                while (resultSet.next()) {
+                    String account = resultSet.getString("ACCOUNT");
+                    String taskID = resultSet.getString("TASK_ID");
+                    int rank = resultSet.getInt("RANK");
+                    String task = resultSet.getString("TASK");
+                    LocalDateTime deadline = LocalDateTime.parse(resultSet.getString("DEADLINE"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                    LocalDateTime scheduledTime = LocalDateTime.parse(resultSet.getString("SCHEDULED_TIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                    Boolean manual = Boolean.parseBoolean(resultSet.getString("MANUAL"));
+                    Boolean recurring = Boolean.parseBoolean(resultSet.getString("RECURRING"));
+                    scale size = scale.values()[resultSet.getInt("SIZE")];
+                    progress status = progress.values()[resultSet.getInt("STATUS")];
+
+                    todoList.loadExistingItem(account, taskID, rank, task, deadline, scheduledTime, manual, recurring, size, status);
+                }
+
+                conn.close();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return todoList;
     }
 
     /**

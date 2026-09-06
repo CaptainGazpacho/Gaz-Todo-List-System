@@ -14,12 +14,14 @@ public class backendInit {
         Dotenv dotenv = Dotenv.load();
         String account = dotenv.get("ACCOUNT");
 
-        todoList newList = new todoList();
-        newList.addItem(account, "Finish project", LocalDateTime.of(2026, 4, 5, 17, 0), true, false, scale.LARGE);
-        newList.addItem(account, "Buy groceries", LocalDateTime.of(2026, 4, 9, 12, 0), true, false, scale.MEDIUM);
-        newList.addItem(account, "Call mom", LocalDateTime.of(2026, 4, 2, 18, 0), true, false, scale.SMALL);
-        newList.addItem(account, "Pay bills", LocalDateTime.of(2026, 4, 6, 9, 0), true, false, scale.MEDIUM);
-        newList.addItem(account, "Schedule dentist appointment", LocalDateTime.of(2026, 4, 5, 14, 0), true, false, scale.SMALL);
+        todoList newList = databaseManager.loadData();
+        //newList.addItem(account, "Finish project", LocalDateTime.of(2026, 4, 5, 17, 0), true, false, scale.LARGE);
+        //newList.addItem(account, "Buy groceries", LocalDateTime.of(2026, 4, 9, 12, 0), true, false, scale.MEDIUM);
+        //newList.addItem(account, "Call mom", LocalDateTime.of(2026, 4, 2, 18, 0), true, false, scale.SMALL);
+        //newList.addItem(account, "Pay bills", LocalDateTime.of(2026, 4, 6, 9, 0), true, false, scale.MEDIUM);
+        //newList.addItem(account, "Schedule dentist appointment", LocalDateTime.of(2026, 4, 5, 14, 0), true, false, scale.SMALL);
+
+        newList.addItem(account, "Write a book", LocalDateTime.of(2026, 9, 5, 17, 0), true, false, scale.LARGE);
 
         for (todoItem item : newList.manualDoList.stream().filter(i -> i.scheduledTime.toLocalDate() != null && i.scheduledTime.toLocalDate().isEqual(LocalDateTime.now().toLocalDate())).collect(Collectors.toCollection(ArrayList::new))) {
             System.out.println("Task: " + item.task + ", \nDeadline: " + item.deadline + ", \nManual: " + item.mmanual + ", \nRecurring: " + item.recurring + ", \nUrgency: " + item.urgency + ", \nSize: " + item.size + ", \nScheduled Time: " + item.scheduledTime + "\n\n");
