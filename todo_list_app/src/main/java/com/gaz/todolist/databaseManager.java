@@ -51,10 +51,53 @@ public class databaseManager {
                     );
                     """.formatted(tableName);
 
+            String generateLogTable = """
+                    CREATE TABLE IF NOT EXISTS %s_LOG (
+                        "TIMESTAMP"	TEXT,
+                        "TABLE_NAME" TEXT,
+                        "ACTION" TEXT,
+                        "RECORD_ID" TEXT
+                    );
+                    """.formatted(tableName);
+
+            String createInsertLogTriggerQuery = """
+                    CREATE TRIGGER IF NOT EXISTS %s_INSERT_LOG AFTER INSERT ON %s
+                    BEGIN
+                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), %s, 'INSERT', new.RECORD_ID);
+                    END;
+                    """.formatted(tableName, tableName, tableName, tableName);
+
+            String createUpdateLogTriggerQuery = """
+                    CREATE TRIGGER IF NOT EXISTS %s_UPDATE_LOG AFTER UPDATE ON %s
+                    BEGIN
+                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), %s, 'UPDATE', new.RECORD_ID);
+                    END;
+                    """.formatted(tableName, tableName, tableName, tableName);
+
+            String createDeleteLogTriggerQuery = """
+                    CREATE TRIGGER IF NOT EXISTS %s_DELETE_LOG AFTER DELETE ON %s
+                    BEGIN
+                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), %s, 'DELETE', old.RECORD_ID);
+                    END;
+                    """.formatted(tableName, tableName, tableName, tableName);
+
             try (Connection conn = DriverManager.getConnection(url)) {
                 if (conn != null) {
                     PreparedStatement createTableStmt = conn.prepareStatement(createTableQuery);
                     createTableStmt.execute();
+
+                    PreparedStatement generateLogTableStmt = conn.prepareStatement(generateLogTable);
+                    generateLogTableStmt.execute();
+
+                    PreparedStatement createInsertLogTriggerStmt = conn.prepareStatement(createInsertLogTriggerQuery);
+                    createInsertLogTriggerStmt.execute();
+
+                    PreparedStatement createUpdateLogTriggerStmt = conn.prepareStatement(createUpdateLogTriggerQuery);
+                    createUpdateLogTriggerStmt.execute();
+
+                    PreparedStatement createDeleteLogTriggerStmt = conn.prepareStatement(createDeleteLogTriggerQuery);
+                    createDeleteLogTriggerStmt.execute();
+
                     conn.close();
                 }
             } catch (SQLException e) {
