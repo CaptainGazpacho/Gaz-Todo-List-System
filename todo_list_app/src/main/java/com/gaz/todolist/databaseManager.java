@@ -35,6 +35,66 @@ public class databaseManager {
 
         String url = "jdbc:sqlite:todo_list_app\\sql\\todo_list.db";
 
+        String createAccountTableQuery = """
+                CREATE TABLE IF NOT EXISTS ACCOUNT (
+                    "ACCOUNT_NAME"	TEXT PRIMARY KEY,
+                    "PASSWORD"	TEXT
+                );
+                """;
+
+        String createAccountLogTableQuery = """
+                CREATE TABLE IF NOT EXISTS ACCOUNT_LOG (
+                    "TIMESTAMP"	TEXT,
+                    "TABLE_NAME" TEXT,
+                    "ACTION" TEXT,
+                    "RECORD_ID" TEXT
+                );
+                """;
+
+        String createAccountInsertLogTriggerQuery = """
+                CREATE TRIGGER IF NOT EXISTS ACCOUNT_INSERT_LOG AFTER INSERT ON ACCOUNT
+                BEGIN
+                    INSERT INTO ACCOUNT_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), 'ACCOUNT', 'INSERT', new.ACCOUNT_NAME);
+                END;
+                """;
+
+        String createAccountUpdateLogTriggerQuery = """
+                CREATE TRIGGER IF NOT EXISTS ACCOUNT_UPDATE_LOG AFTER UPDATE ON ACCOUNT
+                BEGIN
+                    INSERT INTO ACCOUNT_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), 'ACCOUNT', 'UPDATE', new.ACCOUNT_NAME);
+                END;
+                """;
+
+        String createAccountDeleteLogTriggerQuery = """
+                CREATE TRIGGER IF NOT EXISTS ACCOUNT_DELETE_LOG AFTER DELETE ON ACCOUNT
+                BEGIN
+                    INSERT INTO ACCOUNT_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), 'ACCOUNT', 'DELETE', old.ACCOUNT_NAME);
+                END;
+                """;
+
+        try (Connection conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                PreparedStatement createAccountTableStmt = conn.prepareStatement(createAccountTableQuery);
+                createAccountTableStmt.execute();
+
+                PreparedStatement createAccountLogTableStmt = conn.prepareStatement(createAccountLogTableQuery);
+                createAccountLogTableStmt.execute();
+
+                PreparedStatement createAccountInsertLogTriggerStmt = conn.prepareStatement(createAccountInsertLogTriggerQuery);
+                createAccountInsertLogTriggerStmt.execute();
+
+                PreparedStatement createAccountUpdateLogTriggerStmt = conn.prepareStatement(createAccountUpdateLogTriggerQuery);
+                createAccountUpdateLogTriggerStmt.execute();
+
+                PreparedStatement createAccountDeleteLogTriggerStmt = conn.prepareStatement(createAccountDeleteLogTriggerQuery);
+                createAccountDeleteLogTriggerStmt.execute();
+
+                conn.close();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
         for(String tableName:listTables) {
             String createTableQuery = """
                     CREATE TABLE IF NOT EXISTS %s (
@@ -111,8 +171,6 @@ public class databaseManager {
      * @return A todoList object containing the loaded data.
      */
     public static todoList loadData() {
-        createDatabase();
-
         Dotenv dotenv = Dotenv.load();
 
         todoList todoList = new todoList();
@@ -157,8 +215,6 @@ public class databaseManager {
      * @param todo
      */
     public static void saveToDatabase(String listName, ArrayList<todoItem> todo) {
-        createDatabase();
-
         String table = " " + listName;
 
         String url = "jdbc:sqlite:todo_list_app\\sql\\todo_list.db";
@@ -189,6 +245,37 @@ public class databaseManager {
                 }
 
                 todo = null;
+                conn.close();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Inserts an account record into the account table
+     * @param account
+     * @param password
+     */
+    public static void registerAccount(String account, String password) {
+        String url = "jdbc:sqlite:todo_list_app\\sql\\todo_list.db";
+
+        String encryptedPassword = "" + password.hashCode();
+
+        String insertQuery = """
+                INSERT INTO ACCOUNT (ACCOUNT_NAME, PASSWORD)
+                    VALUES (?, ?);
+                """;
+
+        try(Connection conn = DriverManager.getConnection(url)) {
+            if(conn != null) {
+                PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
+
+                insertStmt.setString(1, account);
+                insertStmt.setString(2, encryptedPassword);
+
+                insertStmt.execute();
+
                 conn.close();
             }
         } catch (SQLException e) {

@@ -11,6 +11,8 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class backendInit {
     public static void init() {
+        databaseManager.createDatabase();
+
         Dotenv dotenv = Dotenv.load();
         String account = dotenv.get("ACCOUNT");
 
