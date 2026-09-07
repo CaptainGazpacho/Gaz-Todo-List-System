@@ -63,23 +63,23 @@ public class databaseManager {
             String createInsertLogTriggerQuery = """
                     CREATE TRIGGER IF NOT EXISTS %s_INSERT_LOG AFTER INSERT ON %s
                     BEGIN
-                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), %s, 'INSERT', new.RECORD_ID);
+                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), '%s', 'INSERT', new.TASK_ID);
                     END;
-                    """.formatted(tableName, tableName, tableName, tableName);
+                    """.formatted(tableName, tableName, tableName, tableName, tableName);
 
             String createUpdateLogTriggerQuery = """
                     CREATE TRIGGER IF NOT EXISTS %s_UPDATE_LOG AFTER UPDATE ON %s
                     BEGIN
-                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), %s, 'UPDATE', new.RECORD_ID);
+                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), '%s', 'UPDATE', new.TASK_ID);
                     END;
-                    """.formatted(tableName, tableName, tableName, tableName);
+                    """.formatted(tableName, tableName, tableName, tableName, tableName);
 
             String createDeleteLogTriggerQuery = """
                     CREATE TRIGGER IF NOT EXISTS %s_DELETE_LOG AFTER DELETE ON %s
                     BEGIN
-                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), %s, 'DELETE', old.RECORD_ID);
+                        INSERT INTO %s_LOG (TIMESTAMP, TABLE_NAME, ACTION, RECORD_ID) VALUES (datetime(current_timestamp, 'localtime'), '%s', 'DELETE', old.TASK_ID);
                     END;
-                    """.formatted(tableName, tableName, tableName, tableName);
+                    """.formatted(tableName, tableName, tableName, tableName, tableName);
 
             try (Connection conn = DriverManager.getConnection(url)) {
                 if (conn != null) {
