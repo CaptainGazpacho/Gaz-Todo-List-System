@@ -1,15 +1,10 @@
 package com.gaz.todolist;
 
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.TimerTask;
 import java.util.Timer;
-
-import java.nio.file.Path;
 import java.io.IOException;
-import java.nio.file.Files;
-
 import java.time.LocalDateTime;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -17,11 +12,16 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class backendInit {
     public static void init() {
         databaseManager.createDatabase();
-
-        createProperties();
+        propertiesManager.createProperties();
+        try {
+            propertiesManager.setAccountProperty("Gaz");
+            propertiesManager.setAutosaveProperty(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Dotenv dotenv = Dotenv.load();
-        String account = dotenv.get("ACCOUNT");
+        String account = propertiesManager.loadAccountProperty();
 
         todoList newList = databaseManager.loadData();
         newList.addItem(account, "Finish project", LocalDateTime.of(2026, 4, 5, 17, 0), true, false, scale.LARGE);
@@ -78,19 +78,6 @@ public class backendInit {
                     databaseManager.saveToDatabase("COMPLETE_TODO_LIST", newList.completeDoList);
                 }
             }, "Shutdown-thread"));
-        }
-    }
-    
-    public static void createProperties() {
-        var p = Path.of("app.properties");
-        try {
-            var w = Files.newBufferedWriter(p);
-            var props = new Properties();
-            props.setProperty("ACCOUNT", "Gaz");
-            props.store(w, "Saved Account");
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
