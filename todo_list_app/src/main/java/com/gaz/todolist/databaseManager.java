@@ -8,9 +8,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
+import java.util.UUID;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -38,7 +41,9 @@ public class databaseManager {
         String createAccountTableQuery = """
                 CREATE TABLE IF NOT EXISTS ACCOUNT (
                     "ACCOUNT_NAME"	TEXT PRIMARY KEY,
-                    "PASSWORD"	TEXT
+                    "PASSWORD"	TEXT,
+                    "SESSION_TOKEN" TEXT,
+                    "AUTOSAVE_STATUS" TEXT
                 );
                 """;
 
@@ -263,8 +268,8 @@ public class databaseManager {
         String encryptedPassword = "" + password.hashCode();
 
         String insertQuery = """
-                INSERT INTO ACCOUNT (ACCOUNT_NAME, PASSWORD)
-                    VALUES (?, ?);
+                INSERT INTO ACCOUNT (ACCOUNT_NAME, PASSWORD, SESSION_TOKEN, AUTOSAVE_STATUS)
+                    VALUES (?, ?, ?, ?);
                 """;
 
         try(Connection conn = DriverManager.getConnection(url)) {
@@ -273,6 +278,8 @@ public class databaseManager {
 
                 insertStmt.setString(1, account);
                 insertStmt.setString(2, encryptedPassword);
+                insertStmt.setString(3, UUID.randomUUID().toString());
+                insertStmt.setString(4, "FALSE");
 
                 insertStmt.execute();
 

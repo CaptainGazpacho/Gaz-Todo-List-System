@@ -1,3 +1,4 @@
 todo_list_app/target
 todo_list_app/sql/todo_list.db
 .env
+app.properties
